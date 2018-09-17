@@ -1,3 +1,4 @@
 .vscode
 venv
 ghostdriver.log
+worldometers.py.egg-info

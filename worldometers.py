@@ -131,5 +131,3 @@ class Worldometers():
         
 
     browser.quit()
-
-print(Worldometers().population_projection())
