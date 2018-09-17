@@ -2,3 +2,5 @@
 venv
 ghostdriver.log
 worldometers.py.egg-info
+dist
+build
