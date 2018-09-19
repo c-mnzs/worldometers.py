@@ -1,17 +1,11 @@
+import requests
 from bs4 import BeautifulSoup
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
+
 
 class Worldometers():
     url = 'https://countrymeters.info/en/World'
-    
-    chrome_options = Options()
-    chrome_options.add_argument('headless')
-    chrome_options.add_argument('log-level=3')
-    browser = webdriver.Chrome(chrome_options=chrome_options, service_log_path='NUL')
-    browser.get(url)
-    html = browser.page_source
-    soup = BeautifulSoup(html, 'lxml')
+    html = requests.get(url).text
+    soup = BeautifulSoup(html, 'html.parser')
 
     # World Population
     def current_world_population(self, option = 'total'):
@@ -128,6 +122,3 @@ class Worldometers():
             top_deaths_dict[x] = {'disease_name': top_deaths[x].getText().replace(',', ''), 'deaths_day': top_deaths_numbers_day[x].getText().replace(',', ''), 'deaths_year': top_deaths_numbers_year[x].getText().replace(',', '')}
 
         return top_deaths_dict
-        
-
-    browser.quit()
