@@ -1,14 +1,15 @@
-import requests
 from bs4 import BeautifulSoup
+from urllib.request import urlopen
 
 
 class Worldometers():
     url = 'https://countrymeters.info/en/World'
-    html = requests.get(url).text
+    # html = requests.get(url).text
+    html = urlopen(url)
     soup = BeautifulSoup(html, 'html.parser')
 
     # World Population
-    def current_world_population(self, option = 'total'):
+    def current_world_population(self, option='total'):
         """
         Parses through the HTML page to gather information about the current world population.
 
@@ -24,7 +25,7 @@ class Worldometers():
         elif option.lower() == 'female':
             return int(Worldometers.soup.find(id='cp3').getText().replace(',', ''))
 
-    def population_projection(self, timescale):
+    def population_growth(self, timescale):
         """
         Parses through the HTML page to gather information about the population growth based on the chosen timescale.
 
@@ -106,19 +107,26 @@ class Worldometers():
         if timescale.lower() == 'day':
             return int(Worldometers.soup.find(id='cp9').getText().replace(',', ''))
 
-    def top_death_causes(self):
+    def top_death_causes(self, timescale):
         """
         Parses through the HTML page to gather information about top death causes based on the chosen timescale.
 
         :param timescale: Choose between two types — 'day' or 'year' — that will return results accordingly.
         :return: Integer with the number of deaths.
         """
-        top_deaths = Worldometers.soup.find_all('td', class_='death_name')
-        top_deaths_numbers_day = Worldometers.soup.select('div[id*=dct]')
-        top_deaths_numbers_year = Worldometers.soup.select('div[id*=dcy]')
-        
-        top_deaths_dict = {}
-        for x in range(len(top_deaths)):
-            top_deaths_dict[x] = {'disease_name': top_deaths[x].getText().replace(',', ''), 'deaths_day': top_deaths_numbers_day[x].getText().replace(',', ''), 'deaths_year': top_deaths_numbers_year[x].getText().replace(',', '')}
 
-        return top_deaths_dict
+        top_deaths = Worldometers.soup.find('div', class_='death_top')
+        top_deaths = top_deaths.text.replace(" %", "").splitlines()[4:-4]
+        top_deaths = list(filter(None, top_deaths))
+        while 'Connecting . . .' in top_deaths: top_deaths.remove('Connecting . . .')
+
+        deaths = self.deaths(timescale=timescale)
+
+        deaths_in_timescale = []
+
+        for element in top_deaths[1::2]:
+            deaths_in_timescale.append(int(float(element)*(deaths/100)))
+
+        top_deaths_causes_timescale = dict(zip(top_deaths[0::2], deaths_in_timescale))
+
+        return top_deaths_causes_timescale
